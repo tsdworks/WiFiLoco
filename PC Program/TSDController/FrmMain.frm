@@ -24,6 +24,11 @@ Begin VB.Form FrmMain
    ScaleHeight     =   8595
    ScaleWidth      =   10365
    StartUpPosition =   2  '屏幕中心
+   Begin VB.Timer Timer2 
+      Interval        =   1000
+      Left            =   480
+      Top             =   7320
+   End
    Begin VB.PictureBox Picture1 
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
@@ -52,13 +57,8 @@ Begin VB.Form FrmMain
       TickStyle       =   3
       Value           =   100
    End
-   Begin VB.Timer Timer2 
-      Interval        =   1000
-      Left            =   480
-      Top             =   6360
-   End
    Begin VB.Timer Timer1 
-      Interval        =   1000
+      Interval        =   500
       Left            =   480
       Top             =   6840
    End
@@ -341,36 +341,43 @@ End Function
 Private Sub cmdCheck_Click()
 DoEvents
 On Error GoTo err
+    Timer1.Enabled = False
     If GetWifiName <> "Locomotive@TSD" Then
         MsgBox "未连接到机车！", vbCritical + vbOKOnly, "检查连接"
     Else
         MsgBox "连接成功！", vbInformation + vbOKOnly, "检查连接"
     End If
-    Sleep 1000
+    Timer1.Enabled = True
 Exit Sub
 err:
 MsgBox "未连接到机车！", vbCritical + vbOKOnly, "检查连接"
+Timer1.Enabled = True
 End Sub
 
 Private Sub cmdEmer_Click()
     DoEvents
+    Timer1.Enabled = False
     GetResponse "POST", "http://192.168.4.1/emergency", ""
     DoEvents
     sliRes.Value = 1
     sliPower.Value = 100
+    Timer1.Enabled = True
 End Sub
 
 Private Sub cmdHigh_Click()
     DoEvents
+    Timer1.Enabled = False
     cmdOFF.BackColor = &H8000000F
     cmdMid.BackColor = &H8000000F
     cmdHigh.BackColor = vbGreen
     GetResponse "POST", "http://192.168.4.1/lightmax", ""
     DoEvents
+    Timer1.Enabled = True
 End Sub
 
 Private Sub cmdLightBackward_Click()
     DoEvents
+    Timer1.Enabled = False
     cmdLightForward.BackColor = &H8000000F
     cmdLightBackward.BackColor = vbGreen
     Call cmdOFF_Click
@@ -379,11 +386,13 @@ Private Sub cmdLightBackward_Click()
     GetResponse "POST", "http://192.168.4.1/lightbackward", ""
     DoEvents
     GetResponse "POST", "http://192.168.4.1/lightoff", ""
+    Timer1.Enabled = True
     DoEvents
 End Sub
 
 Private Sub cmdLightForward_Click()
 DoEvents
+    Timer1.Enabled = False
     cmdLightForward.BackColor = vbGreen
     cmdLightBackward.BackColor = &H8000000F
     Call cmdOFF_Click
@@ -393,23 +402,28 @@ DoEvents
     DoEvents
     GetResponse "POST", "http://192.168.4.1/lightoff", ""
     DoEvents
+    Timer1.Enabled = True
 End Sub
 
 Private Sub cmdMid_Click()
     DoEvents
+    Timer1.Enabled = False
     cmdOFF.BackColor = &H8000000F
     cmdMid.BackColor = vbGreen
     cmdHigh.BackColor = &H8000000F
     GetResponse "POST", "http://192.168.4.1/lightmid", ""
+    Timer1.Enabled = True
     DoEvents
 End Sub
 
 Private Sub cmdOFF_Click()
-DoEvents
+    DoEvents
+    Timer1.Enabled = False
     cmdOFF.BackColor = vbGreen
     cmdMid.BackColor = &H8000000F
     cmdHigh.BackColor = &H8000000F
     GetResponse "POST", "http://192.168.4.1/lightoff", ""
+    Timer1.Enabled = True
 End Sub
 
 
@@ -429,13 +443,16 @@ End Sub
 
 Private Sub sliPower_Change()
     DoEvents
+    Timer1.Enabled = False
     GetResponse "POST", "http://192.168.4.1/setpower?value=" & (100 - sliPower.Value), ""
+    Timer1.Enabled = True
     DoEvents
 End Sub
 
 
 Private Sub sliRes_Change()
 DoEvents
+    Timer1.Enabled = False
     If sliRes.Value = 1 Then
         GetResponse "POST", "http://192.168.4.1/setneu", ""
         DoEvents
@@ -446,27 +463,28 @@ DoEvents
         GetResponse "POST", "http://192.168.4.1/setforward", ""
         DoEvents
     End If
+    Timer1.Enabled = True
 End Sub
 
 
 Private Sub Timer1_Timer()
-DoEvents
-If sliRes.Value = 1 Then
-    sliPower.Value = 100
-    sliPower.Enabled = False
-Else
-    sliPower.Enabled = True
-End If
-If sliPower.Value <> 100 Then
-    sliRes.Enabled = False
-Else
-    sliRes.Enabled = True
-End If
+    DoEvents
+    If sliRes.Value = 1 Then
+        sliPower.Value = 100
+        sliPower.Enabled = False
+    Else
+        sliPower.Enabled = True
+    End If
+    If sliPower.Value <> 100 Then
+        sliRes.Enabled = False
+    Else
+        sliRes.Enabled = True
+    End If
 End Sub
 
 Private Sub Timer2_Timer()
-DoEvents
-On Error Resume Next
+    DoEvents
+    On Error Resume Next
     If GetWifiName <> "Locomotive@TSD" Then
         sliPower.Enabled = False
         sliRes.Enabled = False
