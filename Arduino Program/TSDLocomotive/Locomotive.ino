@@ -14,12 +14,6 @@
 #define PWR_MIN 0
 #define PWR_MAX 100
 #define ACCURATE 1
-#define L0 0
-#define L1 20
-#define L2 40
-#define L3 60
-#define L4 80
-#define L5 100
 
 enum LocoDirection {FWD, NEU, BWD};
 
@@ -220,7 +214,6 @@ public:
 //define loco
 Locomotive myLoco;
 //define web server
-TimerObject *tmrProcess = new TimerObject(10);
 const char *wifi_SSID = "Locomotive@TSD";
 const char *wifi_PWD = "zmh1999124";
 ESP8266WebServer webService(80);
