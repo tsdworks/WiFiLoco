@@ -14,6 +14,7 @@
 #define PWR_MIN 0
 #define PWR_MAX 100
 #define ACCURATE 1
+#define ACCURATE_TIME 20
 
 enum LocoDirection {FWD, NEU, BWD};
 
@@ -27,7 +28,7 @@ private:
 	u8 motor1_IN2;
 	u8 motor1_PWM;
 	int motor_Speed;
-	enum LocoDirection motor_Dir;
+	LocoDirection motor_Dir;
 public:
 	LocoMotor(u8 m0_IN1, u8 m0_IN2, u8 m0_PWM, u8 m1_IN1, u8 m1_IN2, u8 m1_PWM)
 	{
@@ -51,7 +52,7 @@ public:
 		SetSpeed(MIN_SPEED);
 	}
 
-	void SetDir(enum LocoDirection tarDir)
+	void SetDir(LocoDirection tarDir)
 	{
 		if (!motor_Speed)motor_Dir = tarDir;
 	}
@@ -87,7 +88,7 @@ public:
 		SetDir(FWD);
 	}
 
-	void SetDir(enum LocoDirection tarDir)
+	void SetDir(LocoDirection tarDir)
 	{
 		if (tarDir == FWD)
 		{
@@ -124,18 +125,18 @@ public:
 	}
 };
 
-LocoMotor motor(5, 4, 0, 14, 12, 2);
-LocoLight light(13, 15, 3, 1);
+LocoMotor motor(5, 4, 0, 14, 12, 2);//motor0_IN1 motor0_IN2 motor0_PWM motor1_...
+LocoLight light(13, 15, 3, 1);//forward_white_pmw,forward_red_pmw,backward...
 
 class Locomotive
 {
 private:
-	enum LocoDirection loco_LastLightDir;
+	LocoDirection loco_LastLightDir;
 public:
 	int loco_tarSpeed;
 	int loco_curSpeed;
-	enum LocoDirection loco_Dir;
-	enum LocoDirection loco_LightDir;
+	LocoDirection loco_Dir;
+	LocoDirection loco_LightDir;
 	int loco_LightLevel;
 	Locomotive()
 	{
@@ -152,7 +153,7 @@ public:
 		loco_LightLevel = LIGHT_OFF;
 	}
 
-	void SetDir(enum LocoDirection tarDir)
+	void SetDir(LocoDirection tarDir)
 	{
 		if (!loco_tarSpeed)loco_Dir = tarDir;
 		if (loco_Dir == NEU)loco_curSpeed = PWR_MIN;
@@ -168,7 +169,7 @@ public:
 		if (loco_Dir != NEU)loco_tarSpeed = constrain(tarSpd, PWR_MIN, PWR_MAX);
 	}
 
-	void SetLightDir(enum LocoDirection tarDir)
+	void SetLightDir(LocoDirection tarDir)
 	{
 		loco_LastLightDir = loco_LightDir;
 		loco_LightDir = tarDir;
@@ -199,13 +200,13 @@ public:
 		{
 			loco_curSpeed += ACCURATE;
 			motor.SetSpeed(map(loco_curSpeed, PWR_MIN, PWR_MAX, MIN_SPEED, MAX_SPEED));
-			delay(10);
+			delay(ACCURATE_TIME);
 		}
 		else if (loco_curSpeed > loco_tarSpeed)
 		{
 			loco_curSpeed -= ACCURATE;
 			motor.SetSpeed(map(loco_curSpeed, PWR_MIN, PWR_MAX, MIN_SPEED, MAX_SPEED));
-			delay(10);
+			delay(ACCURATE_TIME);
 		}
 		motor.Process();
 	}
@@ -214,8 +215,8 @@ public:
 //define loco
 Locomotive myLoco;
 //define web server
-const char *wifi_SSID = "Locomotive@TSD";
-const char *wifi_PWD = "zmh1999124";
+const char *wifi_SSID = "Locomotive@TSD";//define your SSID here
+const char *wifi_PWD = "Locomotive@TSD";//define your AP Password here
 ESP8266WebServer webService(80);
 
 void setup()
